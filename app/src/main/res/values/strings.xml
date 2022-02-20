@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">WallpaperUpdater</string>
+    <string name="update_button">Updater Now</string>
+    <string name="add_source_hint">add new url/API here</string>
+    <string name="add_button">add new API or url</string>
+    <string name="apply_button">apply change to current</string>
+    <string name="copy_button">copy url for edition</string>
+    <string name="storage">api</string>
+</resources>
