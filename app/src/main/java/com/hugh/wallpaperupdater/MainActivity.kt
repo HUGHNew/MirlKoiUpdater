@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
+import android.hardware.display.DisplayManager
 import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -14,11 +15,14 @@ import android.os.Environment.DIRECTORY_PICTURES
 import android.os.StrictMode
 import android.provider.MediaStore
 import android.util.Log
+import android.view.Display
 import android.view.View
+import android.view.WindowManager
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.contentValuesOf
+import androidx.core.content.getSystemService
 import java.io.*
 import java.net.URL
 import java.time.LocalDateTime
@@ -31,11 +35,12 @@ class MainActivity : AppCompatActivity() {
         const val single = "updater.jpg"
         const val tag = "Updater"
         const val storage = "api"
+        const val half_url = "https://picsum.photos/" // make size fix screen
         val apis = listOf("https://api.btstu.cn/sjbz/api.php?method=mobile",
-            "https://picsum.photos/1080/1920",
-            "https://iw233.cn/API/mp.php")
+            "https://iw233.cn/API/mp.php",
+        )
         @RequiresApi(Build.VERSION_CODES.O)
-        public fun getDateTimeFilename(pattern : String):String=DateTimeFormatter.ofPattern(pattern).format(LocalDateTime.now())
+        fun getDateTimeFilename(pattern : String):String=DateTimeFormatter.ofPattern(pattern).format(LocalDateTime.now())
     }
     private lateinit var api : String
     private val mApis = ArrayList<String>()
@@ -54,9 +59,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().permitAll().build())
         supportActionBar?.hide()
-        initViews()
-        initSpinner()
-        initButtons()
+        initAll()
         setAppPreview()
     }
 
@@ -64,6 +67,13 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         saveUrlList()
         Log.d(tag,"OnDestroy changes saved")
+    }
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun initAll(){
+        initViews()
+        initSpinner()
+        initButtons()
+        Log.d(tag,"Screen width:${getDisplayScale(" height:")}")
     }
     private fun initViews(){
         editor = findViewById(R.id.add_url)
@@ -95,12 +105,17 @@ class MainActivity : AppCompatActivity() {
         // region url buttons
         add.setOnClickListener {
             if(editor.text.isNotEmpty() and (editor.text.toString() !in mApis)){
-                mApis.add(editor.text.toString())
+                val app = editor.text.toString()
+                mApis.add(app)
+                Log.d(tag,"url appended: $app")
             }
         }
         apply.setOnClickListener {
             if(editor.text.isNotEmpty()){
-                mApis[dropdown.selectedItemPosition]=editor.text.toString()
+                val raw = mApis[dropdown.selectedItemPosition]
+                val modified = editor.text.toString()
+                mApis[dropdown.selectedItemPosition]=modified
+                Log.d(tag,"Modified: from $raw to $modified")
             }
         }
         copy.setOnClickListener {
@@ -180,6 +195,7 @@ class MainActivity : AppCompatActivity() {
         if (!internalFileExists(storage)){
             createDefaultUrlFile()
             mApis.addAll(apis)
+            mApis.add(half_url+getDisplayScale())
         }
         else{
             InputStreamReader(openFileInput(storage)).use {
@@ -192,12 +208,24 @@ class MainActivity : AppCompatActivity() {
     }
     private fun saveUrlList() = saveUrls(storage,mApis)
     private fun internalFileExists(file: String):Boolean = getFileStreamPath(file).exists()
-    private fun createDefaultUrlFile() = saveUrls(storage,apis)
-    private fun saveUrls(file:String,urls:List<String>){
+    private fun createDefaultUrlFile() = saveUrls(storage,apis){
+        it.appendLine(half_url+getDisplayScale())
+    }
+    private fun saveUrls(file:String,urls:List<String>,block:(OutputStreamWriter)->Unit={}){
         OutputStreamWriter(openFileOutput(file, MODE_PRIVATE)).use {
             for (api in urls) {
                 it.appendLine(api)
             }
+            block(it)
         }
     }
+
+    private fun getDisplayScale(delim:String = "/"):String  =
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+            getSystemService<DisplayManager>()?.getDisplay(Display.DEFAULT_DISPLAY)
+        }else{
+            windowManager.defaultDisplay
+        }?.let{
+            "${it.width}$delim${it.height}"
+        }?:"1080${delim}1920"
 }
