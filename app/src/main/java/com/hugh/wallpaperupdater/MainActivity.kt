@@ -24,6 +24,7 @@ import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.net.ssl.HttpsURLConnection
+import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
     companion object{
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var add : Button
     private lateinit var apply : Button
     private lateinit var copy : Button
+    private lateinit var remove : Button
     private lateinit var up : Button
     private lateinit var main : ConstraintLayout
 
@@ -69,6 +71,7 @@ class MainActivity : AppCompatActivity() {
         add = findViewById(R.id.add_button)
         apply = findViewById(R.id.apply_button)
         copy = findViewById(R.id.copy_button)
+        remove = findViewById(R.id.rm_button)
         up = findViewById(R.id.update_button)
         main = findViewById(R.id.layout)
     }
@@ -104,19 +107,32 @@ class MainActivity : AppCompatActivity() {
             editor.setText(api)
             Log.d(tag,"copy url to EditText")
         }
+        remove.setOnClickListener {
+            if(mApis.size==1){
+                Toast.makeText(this,"You can't remove the last one URL!",Toast.LENGTH_SHORT).show()
+            }else{
+                val idx =
+                    if(dropdown.selectedItemPosition!=mApis.size-1) dropdown.selectedItemPosition
+                    else mApis.size-2
+                mApis.remove(api)
+                dropdown.setSelection(idx)
+                api = mApis[idx]
+            }
+        }
         // endregion
         up.setOnClickListener {
-            val bitmap = download(api)
-            bitmap?.saveToLocal(openFileOutput(single, Context.MODE_PRIVATE)){
-                Log.d(tag,"get fd downloaded this image")
-            }
+            val th = thread{
+                val bitmap = download(api)
+                bitmap?.saveToLocal(openFileOutput(single, Context.MODE_PRIVATE)){
+                    Log.d(tag,"get fd downloaded this image")
+                }
+                val os = getExternalImageOutputStream(getDateTimeFilename("yy_MM_dd_HH_mm_ss"))
+                os?.let { bitmap?.saveToGallery(os){Log.d(tag,"save image to gallery")} }
+                bitmap?.saveToWallpaper(getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager){
+                    Log.d(tag,"switch wallpaper")
+                }
 
-            setAppPreview(true)
-
-            val os = getExternalImageOutputStream(getDateTimeFilename("yy_MM_dd_HH_mm_ss"))
-            os?.let { bitmap?.saveToGallery(os){Log.d(tag,"save image to gallery")} }
-            bitmap?.saveToWallpaper(getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager){
-                Log.d(tag,"switch wallpaper")
+                runOnUiThread { setAppPreview(true) }
             }
         }
     }

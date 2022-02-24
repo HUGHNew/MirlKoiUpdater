@@ -3,7 +3,7 @@
 A simple app for updating wallpaper from online API
 
 todo
-- [ ] coroutine for downloading
+- [x] coroutine for downloading ~~async exactly~~
 - [ ] single or save mode for choice
 - [ ] timer for update
 - [ ] desktop widget

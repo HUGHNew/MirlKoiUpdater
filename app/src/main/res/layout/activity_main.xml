@@ -18,6 +18,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <Button
+        android:id="@+id/rm_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/rm_button"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toBottomOf="@+id/url_list"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/url_list" />
     <EditText
         android:id="@+id/add_url"
         android:layout_width="0dp"
