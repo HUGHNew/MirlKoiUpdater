@@ -13,3 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+activity_drawer_open.xml

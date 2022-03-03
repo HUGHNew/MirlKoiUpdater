@@ -4,8 +4,6 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.Drawable
-import android.hardware.display.DisplayManager
 import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -15,14 +13,12 @@ import android.os.Environment.DIRECTORY_PICTURES
 import android.os.StrictMode
 import android.provider.MediaStore
 import android.util.Log
-import android.view.Display
 import android.view.View
-import android.view.WindowManager
 import android.widget.*
 import androidx.annotation.RequiresApi
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.contentValuesOf
-import androidx.core.content.getSystemService
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import java.io.*
 import java.net.URL
 import java.time.LocalDateTime
@@ -44,14 +40,22 @@ class MainActivity : AppCompatActivity() {
     }
     private lateinit var api : String
     private val mApis = ArrayList<String>()
-    private lateinit var editor: EditText
-    private lateinit var dropdown : Spinner
-    private lateinit var add : Button
-    private lateinit var apply : Button
-    private lateinit var copy : Button
-    private lateinit var remove : Button
-    private lateinit var up : Button
-    private lateinit var main : ConstraintLayout
+    private val editor : EditText by lazy { findViewById(R.id.add_url) }
+    private val dropdown : Spinner by lazy { findViewById(R.id.url_list) }
+    private val add : Button by lazy { findViewById(R.id.add_button) }
+    private val apply : Button by lazy { findViewById(R.id.apply_button) }
+    private val copy : Button by lazy { findViewById(R.id.copy_button) }
+    private val remove : Button by lazy { findViewById(R.id.rm_button) }
+    private val up : Button by lazy { findViewById(R.id.update_button) }
+    private val settings : ImageButton by lazy {findViewById(R.id.settings)}
+//    private val main : ConstraintLayout by lazy { findViewById(R.id.layout) }
+    private val drawer : DrawerLayout by lazy { findViewById(R.id.layout_drawer) }
+    // region on drawer
+    private val timer : TimePicker by lazy { findViewById(R.id.time_setter) }
+    private val autoUpdater : CheckBox by lazy { findViewById(R.id.updater_trigger) }
+    private val updateDaily : RadioButton by lazy { findViewById(R.id.update_daily) }
+    private val updatePeriod : RadioButton by lazy { findViewById(R.id.update_period) }
+    // endregion
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,8 +63,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().permitAll().build())
         supportActionBar?.hide()
-        initAll()
-        setAppPreview()
+
+        initSpinner()
+        initButtons()
+        Log.d(tag,"Screen width:${getDisplayScale(" height:")}")
+
+        timer.setIs24HourView(true)
+        setAppPreview(drawer)
     }
 
     override fun onDestroy() {
@@ -68,23 +77,7 @@ class MainActivity : AppCompatActivity() {
         saveUrlList()
         Log.d(tag,"OnDestroy changes saved")
     }
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun initAll(){
-        initViews()
-        initSpinner()
-        initButtons()
-        Log.d(tag,"Screen width:${getDisplayScale(" height:")}")
-    }
-    private fun initViews(){
-        editor = findViewById(R.id.add_url)
-        dropdown = findViewById(R.id.url_list)
-        add = findViewById(R.id.add_button)
-        apply = findViewById(R.id.apply_button)
-        copy = findViewById(R.id.copy_button)
-        remove = findViewById(R.id.rm_button)
-        up = findViewById(R.id.update_button)
-        main = findViewById(R.id.layout)
-    }
+
     private fun initSpinner(){
         // region dropdown list
         dropdown.adapter = loadUrlList()
@@ -136,7 +129,7 @@ class MainActivity : AppCompatActivity() {
         }
         // endregion
         up.setOnClickListener {
-            val th = thread{
+            thread{
                 val bitmap = download(api)
                 bitmap?.saveToLocal(openFileOutput(single, Context.MODE_PRIVATE)){
                     Log.d(tag,"get fd downloaded this image")
@@ -147,15 +140,27 @@ class MainActivity : AppCompatActivity() {
                     Log.d(tag,"switch wallpaper")
                 }
 
-                runOnUiThread { setAppPreview(true) }
+                runOnUiThread { setAppPreview(drawer,true) }
             }
         }
-    }
-    private fun setAppPreview(directSet : Boolean = false){
-        if(directSet or internalFileExists(single)){
-            main.background = Drawable.createFromStream(openFileInput(single),null)
+        // region drawer buttons
+        settings.setOnClickListener {
+            drawer.openDrawer(GravityCompat.END)
         }
+        autoUpdater.setOnClickListener {
+            if (autoUpdater.isChecked){
+                updateDaily.visibility=View.VISIBLE
+                updatePeriod.visibility=View.VISIBLE
+                // TODO to set task
+            }else{
+                updateDaily.visibility=View.INVISIBLE
+                updatePeriod.visibility=View.INVISIBLE
+                // TODO to unset task
+            }
+        }
+        // endregion
     }
+
     private fun download(url:String): Bitmap? {
         var bitmap : Bitmap?
         with(URL(url).openConnection() as HttpsURLConnection){
@@ -177,7 +182,7 @@ class MainActivity : AppCompatActivity() {
             val contentValues = contentValuesOf (
                 MediaStore.MediaColumns.DISPLAY_NAME to filename,
                 MediaStore.MediaColumns.MIME_TYPE to MIME,
-                MediaStore.MediaColumns.RELATIVE_PATH to DIRECTORY_PICTURES
+                MediaStore.MediaColumns.RELATIVE_PATH to "${DIRECTORY_PICTURES}/WUpdater"
             )
             //Inserting the contentValues to contentResolver and getting the Uri
             val imageUri: Uri? =
@@ -185,7 +190,7 @@ class MainActivity : AppCompatActivity() {
             Log.d(tag,imageUri.toString())
             imageUri?.let { contentResolver.openOutputStream(it) }
         } else {
-            val path = Environment.getExternalStoragePublicDirectory(DIRECTORY_PICTURES)
+            val path = Environment.getExternalStoragePublicDirectory("${DIRECTORY_PICTURES}/WUpdater")
             Log.d(tag,"use API before Q|$path")
             val image = File(path,filename)
             FileOutputStream(image)
@@ -207,25 +212,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun saveUrlList() = saveUrls(storage,mApis)
-    private fun internalFileExists(file: String):Boolean = getFileStreamPath(file).exists()
     private fun createDefaultUrlFile() = saveUrls(storage,apis){
         it.appendLine(half_url+getDisplayScale())
     }
-    private fun saveUrls(file:String,urls:List<String>,block:(OutputStreamWriter)->Unit={}){
-        OutputStreamWriter(openFileOutput(file, MODE_PRIVATE)).use {
-            for (api in urls) {
-                it.appendLine(api)
-            }
-            block(it)
-        }
-    }
-
-    private fun getDisplayScale(delim:String = "/"):String  =
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
-            getSystemService<DisplayManager>()?.getDisplay(Display.DEFAULT_DISPLAY)
-        }else{
-            windowManager.defaultDisplay
-        }?.let{
-            "${it.width}$delim${it.height}"
-        }?:"1080${delim}1920"
 }

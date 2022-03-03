@@ -7,4 +7,8 @@
     <string name="copy_button">copy url for edition</string>
     <string name="rm_button">rm url</string>
     <string name="storage">api</string>
+    <string name="settings">update-settings</string>
+    <string name="update_timer_trigger">enable auto update</string>
+    <string name="update_mode_timer">update daily</string>
+    <string name="update_mode_counting">update periodically</string>
 </resources>
