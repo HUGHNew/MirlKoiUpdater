@@ -20,6 +20,7 @@ import androidx.core.content.contentValuesOf
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import java.io.*
+import java.net.HttpURLConnection
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity() {
         @RequiresApi(Build.VERSION_CODES.O)
         fun getDateTimeFilename(pattern : String):String=DateTimeFormatter.ofPattern(pattern).format(LocalDateTime.now())
     }
+    // region Xml UI
     private lateinit var api : String
     private val mApis = ArrayList<String>()
     private val editor : EditText by lazy { findViewById(R.id.add_url) }
@@ -55,6 +57,7 @@ class MainActivity : AppCompatActivity() {
     private val autoUpdater : CheckBox by lazy { findViewById(R.id.updater_trigger) }
     private val updateDaily : RadioButton by lazy { findViewById(R.id.update_daily) }
     private val updatePeriod : RadioButton by lazy { findViewById(R.id.update_period) }
+    // endregion
     // endregion
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -131,6 +134,9 @@ class MainActivity : AppCompatActivity() {
         up.setOnClickListener {
             thread{
                 val bitmap = download(api)
+                if(bitmap==null){
+                    Log.w(tag,"Don't get wallpaper from API")
+                }
                 bitmap?.saveToLocal(openFileOutput(single, Context.MODE_PRIVATE)){
                     Log.d(tag,"get fd downloaded this image")
                 }
@@ -160,21 +166,36 @@ class MainActivity : AppCompatActivity() {
         }
         // endregion
     }
-
-    private fun download(url:String): Bitmap? {
-        var bitmap : Bitmap?
-        with(URL(url).openConnection() as HttpsURLConnection){
+    private fun getURLConnection(url:String):HttpURLConnection{
+        val con = if ("https" in url)
+            URL(url).openConnection() as HttpsURLConnection
+        else URL(url).openConnection() as HttpURLConnection
+        return con.apply {
             doInput = true
             requestMethod = "GET"
-            connect()
-            bitmap = try {
-                Log.d(tag,"Downloading image")
-                BitmapFactory.decodeStream(inputStream)
-            } catch (e:IOException){
-                Log.d(tag,"Error when downloading image : ${e.message}")
-                null
-            }
+            instanceFollowRedirects = true
         }
+    }
+    private fun download(url:String): Bitmap? {
+        var bitmap : Bitmap? = null
+        Log.d(tag,"Target URL:$url")
+        var connector = getURLConnection(url)
+        var redirect = true
+        do {
+            connector.connect()
+            if(connector.responseCode == 200){
+                Log.d(tag,"fetch image successfully")
+                redirect = false
+                Log.d(tag,"Downloading image")
+                bitmap = BitmapFactory.decodeStream(connector.inputStream)
+                connector.disconnect()
+            }else{
+                Log.d(tag,"resp code:${connector.responseCode}|url:${connector.url}")
+                Log.w(tag,"location:${connector.getHeaderField("Location")}")
+                connector.disconnect()
+                connector = getURLConnection(connector.getHeaderField("Location"))
+            }
+        }while (redirect)
         return bitmap
     }
     private fun getExternalImageOutputStream(filename : String,MIME:String = "image/jpeg"):OutputStream? {
