@@ -44,11 +44,9 @@ class MainActivity : AppCompatActivity() {
     private val mApis = ArrayList<String>()
     private val editor : EditText by lazy { findViewById(R.id.add_url) }
     private val dropdown : Spinner by lazy { findViewById(R.id.url_list) }
-    private val add : Button by lazy { findViewById(R.id.add_button) }
-    private val apply : Button by lazy { findViewById(R.id.apply_button) }
-    private val copy : Button by lazy { findViewById(R.id.copy_button) }
-    private val remove : Button by lazy { findViewById(R.id.rm_button) }
-    private val up : Button by lazy { findViewById(R.id.update_button) }
+    private val add : ImageButton by lazy { findViewById(R.id.add_button) }
+    private val remove : ImageButton by lazy { findViewById(R.id.rm_button) }
+    private val up : ImageButton by lazy { findViewById(R.id.update_button) }
     private val settings : ImageButton by lazy {findViewById(R.id.settings)}
 //    private val main : ConstraintLayout by lazy { findViewById(R.id.layout) }
     private val drawer : DrawerLayout by lazy { findViewById(R.id.layout_drawer) }
@@ -105,18 +103,6 @@ class MainActivity : AppCompatActivity() {
                 mApis.add(app)
                 Log.d(tag,"url appended: $app")
             }
-        }
-        apply.setOnClickListener {
-            if(editor.text.isNotEmpty()){
-                val raw = mApis[dropdown.selectedItemPosition]
-                val modified = editor.text.toString()
-                mApis[dropdown.selectedItemPosition]=modified
-                Log.d(tag,"Modified: from $raw to $modified")
-            }
-        }
-        copy.setOnClickListener {
-            editor.setText(api)
-            Log.d(tag,"copy url to EditText")
         }
         remove.setOnClickListener {
             if(mApis.size==1){
