@@ -18,7 +18,7 @@ import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.content.contentValuesOf
 import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
+import com.hugh.wallpaperupdater.databinding.ActivityMainBinding
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
@@ -42,26 +42,14 @@ class MainActivity : AppCompatActivity() {
     // region Xml UI
     private lateinit var api : String
     private val mApis = ArrayList<String>()
-    private val editor : EditText by lazy { findViewById(R.id.add_url) }
-    private val dropdown : Spinner by lazy { findViewById(R.id.url_list) }
-    private val add : ImageButton by lazy { findViewById(R.id.add_button) }
-    private val remove : ImageButton by lazy { findViewById(R.id.rm_button) }
-    private val up : ImageButton by lazy { findViewById(R.id.update_button) }
-    private val settings : ImageButton by lazy {findViewById(R.id.settings)}
-//    private val main : ConstraintLayout by lazy { findViewById(R.id.layout) }
-    private val drawer : DrawerLayout by lazy { findViewById(R.id.layout_drawer) }
-    // region on drawer
-    private val timer : TimePicker by lazy { findViewById(R.id.time_setter) }
-    private val autoUpdater : CheckBox by lazy { findViewById(R.id.updater_trigger) }
-    private val updateDaily : RadioButton by lazy { findViewById(R.id.update_daily) }
-    private val updatePeriod : RadioButton by lazy { findViewById(R.id.update_period) }
     // endregion
-    // endregion
-
+    private lateinit var bind : ActivityMainBinding
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        bind = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(bind.root)
+        
         StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().permitAll().build())
         supportActionBar?.hide()
 
@@ -69,27 +57,35 @@ class MainActivity : AppCompatActivity() {
         initButtons()
         Log.d(tag,"Screen width:${getDisplayScale(" height:")}")
 
-        timer.setIs24HourView(true)
-        setAppPreview(drawer)
+        bind.timeSetter.setIs24HourView(true)
+        setAppPreview(bind.layoutDrawer)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         saveUrlList()
+        saveUrl(api)
         Log.d(tag,"OnDestroy changes saved")
     }
 
     private fun initSpinner(){
-        // region dropdown list
-        dropdown.adapter = loadUrlList()
-        dropdown.onItemSelectedListener=object : AdapterView.OnItemSelectedListener{
+        // region bind.urlList list
+        bind.urlList.adapter = loadUrlList()
+        api = loadUrl()
+        Log.d(tag,"load saved url:$api")
+        val idx = mApis.indexOf(api)
+        if(idx==-1){
+            bind.urlList.setSelection(0)
+            api = mApis[0]
+        }else{
+            bind.urlList.setSelection(idx)
+        }
+        bind.urlList.onItemSelectedListener=object : AdapterView.OnItemSelectedListener{
             override fun onItemSelected(p0: AdapterView<*>?, view: View?, pos: Int, id: Long) {
                 api = mApis[pos]
             }
 
             override fun onNothingSelected(view: AdapterView<*>?) {
-                dropdown.setSelection(0)
-                api = mApis[0]
             }
         }
         // endregion
@@ -97,27 +93,27 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun initButtons(){
         // region url buttons
-        add.setOnClickListener {
-            if(editor.text.isNotEmpty() and (editor.text.toString() !in mApis)){
-                val app = editor.text.toString()
+        bind.addButton.setOnClickListener {
+            if(bind.urlEditor.text.isNotEmpty() and (bind.urlEditor.text.toString() !in mApis)){
+                val app = bind.urlEditor.text.toString()
                 mApis.add(app)
                 Log.d(tag,"url appended: $app")
             }
         }
-        remove.setOnClickListener {
+        bind.rmButton.setOnClickListener {
             if(mApis.size==1){
                 Toast.makeText(this,"You can't remove the last one URL!",Toast.LENGTH_SHORT).show()
             }else{
                 val idx =
-                    if(dropdown.selectedItemPosition!=mApis.size-1) dropdown.selectedItemPosition
+                    if(bind.urlList.selectedItemPosition!=mApis.size-1) bind.urlList.selectedItemPosition
                     else mApis.size-2
                 mApis.remove(api)
-                dropdown.setSelection(idx)
+                bind.urlList.setSelection(idx)
                 api = mApis[idx]
             }
         }
         // endregion
-        up.setOnClickListener {
+        bind.updateButton.setOnClickListener {
             thread{
                 val bitmap = download(api)
                 if(bitmap==null){
@@ -132,21 +128,21 @@ class MainActivity : AppCompatActivity() {
                     Log.d(tag,"switch wallpaper")
                 }
 
-                runOnUiThread { setAppPreview(drawer,true) }
+                runOnUiThread { setAppPreview(bind.layoutDrawer,true) }
             }
         }
         // region drawer buttons
-        settings.setOnClickListener {
-            drawer.openDrawer(GravityCompat.END)
+        bind.settings.setOnClickListener {
+            bind.layoutDrawer.openDrawer(GravityCompat.END)
         }
-        autoUpdater.setOnClickListener {
-            if (autoUpdater.isChecked){
-                updateDaily.visibility=View.VISIBLE
-                updatePeriod.visibility=View.VISIBLE
+        bind.updaterTrigger.setOnClickListener {
+            if (bind.updaterTrigger.isChecked){
+                bind.updateDaily.visibility=View.VISIBLE
+                bind.updatePeriod.visibility=View.VISIBLE
                 // TODO to set task
             }else{
-                updateDaily.visibility=View.INVISIBLE
-                updatePeriod.visibility=View.INVISIBLE
+                bind.updateDaily.visibility=View.INVISIBLE
+                bind.updatePeriod.visibility=View.INVISIBLE
                 // TODO to unset task
             }
         }
@@ -169,17 +165,25 @@ class MainActivity : AppCompatActivity() {
         var redirect = true
         do {
             connector.connect()
-            if(connector.responseCode == 200){
-                Log.d(tag,"fetch image successfully")
-                redirect = false
-                Log.d(tag,"Downloading image")
-                bitmap = BitmapFactory.decodeStream(connector.inputStream)
-                connector.disconnect()
-            }else{
-                Log.d(tag,"resp code:${connector.responseCode}|url:${connector.url}")
-                Log.w(tag,"location:${connector.getHeaderField("Location")}")
-                connector.disconnect()
-                connector = getURLConnection(connector.getHeaderField("Location"))
+            when (connector.responseCode) {
+                200 -> {
+                    Log.d(tag,"fetch image successfully")
+                    redirect = false
+                    Log.d(tag,"Downloading image")
+                    bitmap = BitmapFactory.decodeStream(connector.inputStream)
+                    connector.disconnect()
+                }
+                in 300..400 -> {
+                    Log.d(tag,"resp code:${connector.responseCode}|url:${connector.url}")
+                    Log.w(tag,"location:${connector.getHeaderField("Location")}")
+                    connector.disconnect()
+                    connector = getURLConnection(connector.getHeaderField("Location"))
+                }
+                in 400..500 -> {
+                    Toast.makeText(this,"API server id deprecated",Toast.LENGTH_LONG).show()
+                    connector.disconnect()
+                    redirect=false
+                }
             }
         }while (redirect)
         return bitmap

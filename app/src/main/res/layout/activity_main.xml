@@ -32,7 +32,7 @@
             android:background="@drawable/settings"
             android:contentDescription="@string/settings" />
         <EditText
-            android:id="@+id/add_url"
+            android:id="@+id/url_editor"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="@string/add_source_hint"
