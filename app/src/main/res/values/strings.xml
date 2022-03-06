@@ -1,14 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-    <string name="app_name">WallpaperUpdater</string>
+    <string name="app_name">MirlKoiUpdater</string>
+
+    <string name="mode_desc">设置壁纸模式</string>
+    <string name="mode_lock">设置锁屏壁纸</string>
+    <string name="mode_home">设置桌面壁纸</string>
+    <string name="mode_both">都设置</string>
+
+    <string name="hide_trigger">开启隐藏选项</string>
+
+    <string name="api_mp">竖屏壁纸</string>
+    <string name="api_random">随机壁纸</string>
+    <string name="api_recommend">推荐壁纸</string>
+    <string name="api_recent">最近壁纸</string>
+    <string name="api_porn">🐍图</string>
+
     <string name="update_button">Updater Now</string>
-    <string name="add_source_hint">add new url/API here</string>
-    <string name="add_button">add new API or url</string>
-    <string name="apply_button">apply change to current</string>
-    <string name="copy_button">copy url for edition</string>
-    <string name="rm_button">rm url</string>
-    <string name="storage">api</string>
     <string name="settings">update-settings</string>
-    <string name="update_timer_trigger">enable auto update</string>
-    <string name="update_mode_timer">update daily</string>
-    <string name="update_mode_counting">update periodically</string>
 </resources>

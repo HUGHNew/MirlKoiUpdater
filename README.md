@@ -1,13 +1,10 @@
-# Wallpaper Updater
+# MirlKoiUpdater
 
-A simple app for updating wallpaper from online API
+| API      | 描述                                   |
+| -------- | -------------------------------------- |
+| 竖屏壁纸 | https://iw233.cn/API/mp.php            |
+| 随机壁纸 | https://iw233.cn/API/Random.php        |
+| 壁纸推荐 | https://iw233.cn/API/MirlKoi.php       |
+| 最近更新 | https://iw233.cn/API/MirlKoi-iw233.php |
 
-todo
-- [x] coroutine for downloading ~~async exactly~~
-- [ ] single or save mode for choice
-- [ ] timer for update
-- [ ] desktop widget
-
-## Acknowledgements
-
-icon from <https://www.iconfont.cn/search/index?searchType=icon&q=update> **iconfont.com**
+http://iw233.fgimax2.fgnwctvip.com/API/Ghs.php

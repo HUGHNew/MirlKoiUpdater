@@ -1,4 +1,4 @@
-package com.hugh.wallpaperupdater
+package com.hugh.MirlKoiUpdater
 
 import org.junit.Test
 

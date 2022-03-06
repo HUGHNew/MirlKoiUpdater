@@ -1,4 +1,4 @@
-package com.hugh.wallpaperupdater
+package com.hugh.MirlKoiUpdater
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

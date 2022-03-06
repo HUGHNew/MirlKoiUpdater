@@ -1,4 +1,4 @@
-package com.hugh.wallpaperupdater
+package com.hugh.MirlKoiUpdater
 
 import android.app.Activity
 import android.content.Context
