@@ -5,20 +5,28 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Rect
+import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
 import android.os.StrictMode
+import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.core.content.contentValuesOf
 import androidx.core.view.GravityCompat
 import com.hugh.MirlKoiUpdater.databinding.ActivityMainBinding
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.jar.Manifest
 import javax.net.ssl.HttpsURLConnection
 import kotlin.concurrent.thread
 
@@ -26,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     companion object{
         // region permission code
         const val READ_STORAGE = 0
+        const val WRITE_STORAGE = 1
         // endregion
 
         const val tag = "Updater"
@@ -59,7 +68,6 @@ class MainActivity : AppCompatActivity() {
     }
     // region api
     private var api : String = apis[0]
-    private val mApis = ArrayList<String>()
     // endregion
     private lateinit var bind : ActivityMainBinding
     @RequiresApi(Build.VERSION_CODES.O)
@@ -80,6 +88,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        saveSettings(bind.save.isChecked)
         Log.d(tag,"OnDestroy changes saved")
     }
 
@@ -96,10 +105,18 @@ class MainActivity : AppCompatActivity() {
                         Toast.LENGTH_SHORT).show()
                 }
             }
+            WRITE_STORAGE->{
+                if(grantResults.isEmpty()){
+                    Toast.makeText(this,"无存储权限，无法将壁纸存入手机",
+                        Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
     private fun buttonsAction(){
+        bind.save.isChecked=loadSettings()
+
         bind.apiGroup.setOnCheckedChangeListener { _, id ->
             api = apiRadios[id]!!
             Toast.makeText(this,"切换壁纸选择:${getString(apiDescId[id]!!)}",
@@ -134,12 +151,21 @@ class MainActivity : AppCompatActivity() {
                 bitmap?.saveToLocal(openFileOutput(single, Context.MODE_PRIVATE)){
                     Log.d(tag,"get fd downloaded this image")
                 }
+                if(bind.save.isChecked){
+                    val os = getExternalImageOutputStream(System.currentTimeMillis().toString())
+                    os?.let {
+                        bitmap?.saveToGallery(it){
+                            Log.d(tag,"save image to gallery")
+                        }
+                    }
+                }
                 val width = getDisplayWidth()
                 val height = getDisplayHeight()
                 Log.d(tag,"width:$width,height:$height")
                 bitmap?.saveToWallpaper(
                     getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager,
                     wallpaperFlag, Rect(0,0,width,height)){
+                    Log.d(tag,"bitmap width:${bitmap.width}; height:${bitmap.height}")
                     Log.d(tag,"switch wallpaper")
                 }
 
@@ -195,5 +221,25 @@ class MainActivity : AppCompatActivity() {
             }
         }while (redirect)
         return bitmap
+    }
+    private fun getExternalImageOutputStream(filename : String,MIME:String = "image/jpeg"): OutputStream? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val contentValues = contentValuesOf (
+                MediaStore.MediaColumns.DISPLAY_NAME to filename,
+                MediaStore.MediaColumns.MIME_TYPE to MIME,
+                MediaStore.MediaColumns.RELATIVE_PATH to Environment.DIRECTORY_PICTURES+"/"+PATH
+            )
+            //Inserting the contentValues to contentResolver and getting the Uri
+            val imageUri: Uri? =
+                contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            Log.d(tag,imageUri.toString())
+            imageUri?.let { contentResolver.openOutputStream(it) }
+        } else {
+            val path = Environment.
+                getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+"/"+PATH)
+            Log.d(tag,"use API before Q|$path")
+            val image = File(path,filename)
+            FileOutputStream(image)
+        }
     }
 }

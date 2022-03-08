@@ -13,16 +13,18 @@ import android.view.ViewGroup
 import androidx.core.content.getSystemService
 import androidx.core.graphics.drawable.toDrawable
 
-fun Activity.setAppPreview(layout:ViewGroup,image : Bitmap? = null){
-    if(this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-        !=PackageManager.PERMISSION_GRANTED){
-            requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                MainActivity.READ_STORAGE)
-    }else{
-        layout.background =
-            image?.toDrawable(resources)
-                ?: (getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager).drawable
+fun Activity.askForPermissions(permission:String,requestId:Int,requires:Array<String>){
+    if(checkSelfPermission(permission)!=PackageManager.PERMISSION_GRANTED){
+        requestPermissions(requires,requestId)
     }
+}
+
+fun Activity.setAppPreview(layout:ViewGroup,image : Bitmap? = null){
+    askForPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,MainActivity.READ_STORAGE,
+        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE))
+    layout.background =
+        image?.toDrawable(resources)
+            ?: (getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager).drawable
 }
 
 fun Activity.getDisplayWidth():Int{

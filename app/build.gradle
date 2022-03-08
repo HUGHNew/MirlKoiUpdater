@@ -10,8 +10,8 @@ android {
         applicationId "com.hugh.wallpaperupdater"
         minSdk 24
         targetSdk 32
-        versionCode 5
-        versionName "0.11.1"
+        versionCode 6
+        versionName "0.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
