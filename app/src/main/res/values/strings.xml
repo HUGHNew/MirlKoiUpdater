@@ -17,5 +17,6 @@
     <string name="api_porn">🐍图</string>
 
     <string name="update_button">Updater Now</string>
+    <string name="download_button">Download Current Picture</string>
     <string name="settings">update-settings</string>
 </resources>

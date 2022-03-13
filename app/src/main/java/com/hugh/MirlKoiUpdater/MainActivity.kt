@@ -26,7 +26,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.jar.Manifest
 import javax.net.ssl.HttpsURLConnection
 import kotlin.concurrent.thread
 
@@ -51,24 +50,28 @@ class MainActivity : AppCompatActivity() {
         val apiRadios = mapOf(
             R.id.api_mobile to apis[0],
             R.id.api_random to apis[1],
-            R.id.api_recom to apis[2],
+            R.id.api_recommend to apis[2],
             R.id.api_recent to apis[3],
             R.id.api_porn to apis[4],
         )
         val apiDescId = mapOf(
             R.id.api_mobile to R.string.api_mp,
             R.id.api_random to R.string.api_random,
-            R.id.api_recom to R.string.api_recommend,
+            R.id.api_recommend to R.string.api_recommend,
             R.id.api_recent to R.string.api_recent,
             R.id.api_porn to R.string.api_porn,
         )
         @RequiresApi(Build.VERSION_CODES.O)
         fun getDateTimeFilename(pattern : String):String=
             DateTimeFormatter.ofPattern(pattern).format(LocalDateTime.now())
+        fun logD(tag:String, msg:String){
+            Log.d(tag,msg)
+        }
     }
     // region api
     private var api : String = apis[0]
     // endregion
+    private var bitmap : Bitmap? = null
     private lateinit var bind : ActivityMainBinding
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -124,13 +127,11 @@ class MainActivity : AppCompatActivity() {
             Log.d(tag,"button clicked $api")
         }
 
-        bind.modeGroup.setOnCheckedChangeListener { _, id ->
-            wallpaperFlag = when(id){
-                R.id.wp_lock -> WallpaperManager.FLAG_LOCK // 2
-                R.id.wp_home -> WallpaperManager.FLAG_SYSTEM // 1
-                else -> 3 // LOCK | SYSTEM
-            }
-            Log.d(tag,"wallpaper setting flag:$wallpaperFlag")
+        bind.wpHome.setOnClickListener {
+            wallpaperFlag = wallpaperFlag xor WallpaperManager.FLAG_SYSTEM
+        }
+        bind.wpLock.setOnClickListener {
+            wallpaperFlag = wallpaperFlag xor WallpaperManager.FLAG_LOCK
         }
         bind.hideChoice.setOnClickListener {
             Log.d(tag,"choice clicked!")
@@ -142,9 +143,12 @@ class MainActivity : AppCompatActivity() {
                 Log.d(tag,"set porn radio invisible")
             }
         }
+        bind.downloadButton.setOnClickListener {
+            saveImage2Gallery("Button action : save image to gallery")
+        }
         bind.updateButton.setOnClickListener {
             thread{
-                val bitmap = download(api)
+                bitmap = download(api)
                 if(bitmap==null){
                     Log.w(tag,"Don't get wallpaper from API")
                 }
@@ -152,12 +156,7 @@ class MainActivity : AppCompatActivity() {
                     Log.d(tag,"get fd downloaded this image")
                 }
                 if(bind.save.isChecked){
-                    val os = getExternalImageOutputStream(System.currentTimeMillis().toString())
-                    os?.let {
-                        bitmap?.saveToGallery(it){
-                            Log.d(tag,"save image to gallery")
-                        }
-                    }
+                    saveImage2Gallery("auto mode:save image to gallery")
                 }
                 val width = getDisplayWidth()
                 val height = getDisplayHeight()
@@ -165,8 +164,10 @@ class MainActivity : AppCompatActivity() {
                 bitmap?.saveToWallpaper(
                     getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager,
                     wallpaperFlag, Rect(0,0,width,height)){
-                    Log.d(tag,"bitmap width:${bitmap.width}; height:${bitmap.height}")
+                    Log.d(tag,"bitmap width:${bitmap!!.width}; height:${bitmap!!.height}")
                     Log.d(tag,"switch wallpaper")
+                }?.saveToLocal(openFileOutput("scale.jpg", Context.MODE_PRIVATE)){
+                    Log.d(tag,"save scaled jpeg")
                 }
 
                 runOnUiThread { setAppPreview(bind.layoutDrawer,bitmap) }
@@ -240,6 +241,15 @@ class MainActivity : AppCompatActivity() {
             Log.d(tag,"use API before Q|$path")
             val image = File(path,filename)
             FileOutputStream(image)
+        }
+    }
+    private fun saveImage2Gallery(msg:String){
+        thread {
+            getExternalImageOutputStream(System.currentTimeMillis().toString())?.let {
+                bitmap?.saveToGallery(it){
+                    Log.d(tag,msg)
+                }
+            }
         }
     }
 }
