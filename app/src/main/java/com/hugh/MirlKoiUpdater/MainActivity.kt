@@ -46,8 +46,10 @@ class MainActivity : AppCompatActivity() {
             "https://iw233.cn/API/Mirlkoi.php",
             "https://iw233.cn/API/Mirlkoi-iw233.php",
             "http://iw233.fgimax2.fgnwctvip.com/API/Ghs.php",
+            "https://iw233.cn/API/pc.php",
         )
         val apiRadios = mapOf(
+            R.id.api_pc to apis[5],
             R.id.api_mobile to apis[0],
             R.id.api_random to apis[1],
             R.id.api_recommend to apis[2],
@@ -55,6 +57,7 @@ class MainActivity : AppCompatActivity() {
             R.id.api_porn to apis[4],
         )
         val apiDescId = mapOf(
+            R.id.api_pc to R.string.api_pc,
             R.id.api_mobile to R.string.api_mp,
             R.id.api_random to R.string.api_random,
             R.id.api_recommend to R.string.api_recommend,
@@ -69,9 +72,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
     // region api
-    private var api : String = apis[0]
+    private var api : String = apis[1]
     // endregion
     private var bitmap : Bitmap? = null
+    // todo setting items
+    private val data = mutableMapOf(
+        "save" to "false",
+        "api" to api,
+    )
     private lateinit var bind : ActivityMainBinding
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,7 +90,6 @@ class MainActivity : AppCompatActivity() {
         StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().permitAll().build())
         supportActionBar?.hide()
 
-
         buttonsAction()
         Log.d(tag,"Screen width:${getDisplayScale(" height:")}")
 
@@ -91,7 +98,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+//        data["save"] = bind.save.isChecked.toString()
+//        data["api"] = api
         saveSettings(bind.save.isChecked)
+        saveUrl(apis.indexOf(api))
         Log.d(tag,"OnDestroy changes saved")
     }
 
@@ -120,6 +130,9 @@ class MainActivity : AppCompatActivity() {
     private fun buttonsAction(){
         bind.save.isChecked=loadSettings()
 
+        val selected = loadUrl()
+        api = apis[selected]
+        bind.apiGroup.getChildAt(selected).isSelected = true
         bind.apiGroup.setOnCheckedChangeListener { _, id ->
             api = apiRadios[id]!!
             Toast.makeText(this,"切换壁纸选择:${getString(apiDescId[id]!!)}",
@@ -161,13 +174,11 @@ class MainActivity : AppCompatActivity() {
                 val width = getDisplayWidth()
                 val height = getDisplayHeight()
                 Log.d(tag,"width:$width,height:$height")
-                bitmap?.saveToWallpaper(
+                bitmap = bitmap?.saveToWallpaper(
                     getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager,
                     wallpaperFlag, Rect(0,0,width,height)){
                     Log.d(tag,"bitmap width:${bitmap!!.width}; height:${bitmap!!.height}")
                     Log.d(tag,"switch wallpaper")
-                }?.saveToLocal(openFileOutput("scale.jpg", Context.MODE_PRIVATE)){
-                    Log.d(tag,"save scaled jpeg")
                 }
 
                 runOnUiThread { setAppPreview(bind.layoutDrawer,bitmap) }

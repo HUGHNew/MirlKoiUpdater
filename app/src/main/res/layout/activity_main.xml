@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_drawer"
     android:fitsSystemWindows="true"
+    
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -21,7 +22,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:background="@drawable/settings"
+            android:background="@drawable/ic_btn_setting"
             android:contentDescription="@string/settings" />
 
         <ImageButton
@@ -30,6 +31,7 @@
             android:layout_height="wrap_content"
             android:contentDescription="@string/update_button"
 
+            android:background="@color/trans"
             android:src="@drawable/ic_btn_update"
             app:layout_constraintTop_toBottomOf="@id/h0.8"
             app:layout_constraintEnd_toEndOf="@id/v0.5"
@@ -40,6 +42,7 @@
             android:layout_height="wrap_content"
             android:contentDescription="@string/download_button"
 
+            android:background="@color/trans"
             android:src="@drawable/ic_btn_download"
             app:layout_constraintTop_toBottomOf="@id/h0.8"
             app:layout_constraintEnd_toEndOf="parent"
@@ -85,6 +88,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:text="@string/hide_trigger"/>
         <CheckBox
@@ -104,7 +108,12 @@
             app:layout_constraintTop_toBottomOf="@id/save"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
-
+            <RadioButton
+                android:id="@+id/api_pc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/api_pc"
+                android:textSize="@dimen/font_size"/>
             <RadioButton
                 android:checked="true"
                 android:id="@+id/api_mobile"

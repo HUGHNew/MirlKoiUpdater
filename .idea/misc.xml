@@ -5,6 +5,7 @@
       <map>
         <entry key="app/src/main/res/drawable/ic_btn_add.xml" value="0.1828125" />
         <entry key="app/src/main/res/drawable/ic_btn_rm.xml" value="0.1828125" />
+        <entry key="app/src/main/res/drawable/ic_btn_setting.xml" value="0.34791666666666665" />
         <entry key="app/src/main/res/drawable/ic_btn_update.xml" value="0.32916666666666666" />
         <entry key="app/src/main/res/layout/activity_drawer_open.xml" value="0.31302083333333336" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.25" />
