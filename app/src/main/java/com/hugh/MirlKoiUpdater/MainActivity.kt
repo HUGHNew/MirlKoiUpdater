@@ -13,7 +13,6 @@ import android.os.Environment
 import android.os.StrictMode
 import android.provider.MediaStore
 import android.util.Log
-import android.view.View
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.content.contentValuesOf
@@ -45,16 +44,14 @@ class MainActivity : AppCompatActivity() {
             "https://iw233.cn/API/Random.php",
             "https://iw233.cn/API/Mirlkoi.php",
             "https://iw233.cn/API/Mirlkoi-iw233.php",
-            "http://iw233.fgimax2.fgnwctvip.com/API/Ghs.php",
             "https://iw233.cn/API/pc.php",
         )
         val apiRadios = mapOf(
-            R.id.api_pc to apis[5],
+            R.id.api_pc to apis[4],
             R.id.api_mobile to apis[0],
             R.id.api_random to apis[1],
             R.id.api_recommend to apis[2],
             R.id.api_recent to apis[3],
-            R.id.api_porn to apis[4],
         )
         val apiDescId = mapOf(
             R.id.api_pc to R.string.api_pc,
@@ -62,7 +59,6 @@ class MainActivity : AppCompatActivity() {
             R.id.api_random to R.string.api_random,
             R.id.api_recommend to R.string.api_recommend,
             R.id.api_recent to R.string.api_recent,
-            R.id.api_porn to R.string.api_porn,
         )
         @RequiresApi(Build.VERSION_CODES.O)
         fun getDateTimeFilename(pattern : String):String=
@@ -75,20 +71,13 @@ class MainActivity : AppCompatActivity() {
     private var api : String = apis[1]
     // endregion
     private var bitmap : Bitmap? = null
-    // todo setting items
-    private val data = mutableMapOf(
-        "save" to "false",
-        "api" to api,
-    )
     private lateinit var bind : ActivityMainBinding
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         bind = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)
-        
-        StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().permitAll().build())
-        supportActionBar?.hide()
+
 
         buttonsAction()
         Log.d(tag,"Screen width:${getDisplayScale(" height:")}")
@@ -145,16 +134,6 @@ class MainActivity : AppCompatActivity() {
         }
         bind.wpLock.setOnClickListener {
             wallpaperFlag = wallpaperFlag xor WallpaperManager.FLAG_LOCK
-        }
-        bind.hideChoice.setOnClickListener {
-            Log.d(tag,"choice clicked!")
-            if (bind.hideChoice.isChecked){
-                bind.apiPorn.visibility = View.VISIBLE
-                Log.d(tag,"set porn radio visible")
-            }else{
-                bind.apiPorn.visibility = View.INVISIBLE
-                Log.d(tag,"set porn radio invisible")
-            }
         }
         bind.downloadButton.setOnClickListener {
             saveImage2Gallery("Button action : save image to gallery")

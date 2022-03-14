@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_drawer"
     android:fitsSystemWindows="true"
-    
+
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -84,19 +84,11 @@
         android:layout_width="200dp"
         android:layout_height="match_parent">
         <CheckBox
-            android:id="@+id/hide_choice"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:text="@string/hide_trigger"/>
-        <CheckBox
             android:id="@+id/save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/hide_choice"
-            app:layout_constraintStart_toStartOf="@id/hide_choice"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="@id/api_group"
             android:text="@string/save_to_gallery"/>
         <RadioGroup
             android:id="@+id/api_group"
@@ -142,14 +134,6 @@
                 android:layout_height="wrap_content"
                 android:text="@string/api_recent"
                 android:textSize="@dimen/font_size" />
-
-            <RadioButton
-                android:id="@+id/api_porn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/api_porn"
-                android:textSize="@dimen/font_size"
-                android:visibility="invisible" />
         </RadioGroup>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.drawerlayout.widget.DrawerLayout>
