@@ -7,13 +7,13 @@ import androidx.core.content.edit
 const val shared = "cache"
 const val key = "api"
 const val ifSave = "ifSave"
-fun Activity.saveUrl(url:String){
+fun Activity.saveUrl(url:Int){
     getSharedPreferences(shared, Context.MODE_PRIVATE).edit {
-        putString(key,url)
+        putInt(key,url)
     }
 }
-fun Activity.loadUrl():String{
-    return getSharedPreferences(shared, Context.MODE_PRIVATE).getString(key,"")?:""
+fun Activity.loadUrl():Int{
+    return getSharedPreferences(shared, Context.MODE_PRIVATE).getInt(key,1)
 }
 fun Activity.saveSettings(save:Boolean){
     getSharedPreferences(shared, Context.MODE_PRIVATE).edit {

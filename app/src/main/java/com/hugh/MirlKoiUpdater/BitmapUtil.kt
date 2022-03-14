@@ -2,6 +2,7 @@ package com.hugh.MirlKoiUpdater
 
 import android.app.WallpaperManager
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.graphics.Rect
 import com.hugh.MirlKoiUpdater.MainActivity.Companion.logD
 import java.io.OutputStream
@@ -33,11 +34,14 @@ fun getScaleRatio(src_w:Int,src_h:Int,dst_w:Int,dst_h:Int):Int{
         min(src_h/dst_h,src_w/dst_w)
     }
 }
+fun Bitmap.rotate(degree:Float):Bitmap{
+    val matrix = Matrix()
+    matrix.setRotate(90f,width/2f,height/2f)
+    return Bitmap.createBitmap(this,0,0,width,height,matrix,true)
+}
 fun Bitmap.getFitBitmap(Width:Int,Height:Int):Bitmap{
     val bitmap = if(width>height){
-        val w = height * Width / Height
-        val x = (width-w)/2
-        Bitmap.createBitmap(this,x,0,w,height)
+        this.rotate(90f)
     }else{this}
     val bm = Bitmap.createScaledBitmap(bitmap,Width,Height,true)
     logD("create bitmap","width:${bm.width}|height:${bm.height}")
