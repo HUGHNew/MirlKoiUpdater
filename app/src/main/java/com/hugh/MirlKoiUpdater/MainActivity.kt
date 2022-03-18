@@ -10,12 +10,12 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
-import android.os.StrictMode
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.content.contentValuesOf
+import androidx.core.content.edit
 import androidx.core.view.GravityCompat
 import com.hugh.MirlKoiUpdater.databinding.ActivityMainBinding
 import java.io.File
@@ -23,8 +23,6 @@ import java.io.FileOutputStream
 import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.URL
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import javax.net.ssl.HttpsURLConnection
 import kotlin.concurrent.thread
 
@@ -38,20 +36,21 @@ class MainActivity : AppCompatActivity() {
         const val tag = "Updater"
         const val PATH = "MirlKoi"
         const val single = "update.jpg"
+        const val shared = "cache"
         var wallpaperFlag : Int = WallpaperManager.FLAG_SYSTEM
         val apis = listOf(
+            "https://iw233.cn/API/pc.php",
             "https://iw233.cn/API/mp.php",
             "https://iw233.cn/API/Random.php",
             "https://iw233.cn/API/Mirlkoi.php",
             "https://iw233.cn/API/Mirlkoi-iw233.php",
-            "https://iw233.cn/API/pc.php",
         )
         val apiRadios = mapOf(
-            R.id.api_pc to apis[4],
-            R.id.api_mobile to apis[0],
-            R.id.api_random to apis[1],
-            R.id.api_recommend to apis[2],
-            R.id.api_recent to apis[3],
+            R.id.api_pc to apis[0],
+            R.id.api_mobile to apis[1],
+            R.id.api_random to apis[2],
+            R.id.api_recommend to apis[3],
+            R.id.api_recent to apis[4],
         )
         val apiDescId = mapOf(
             R.id.api_pc to R.string.api_pc,
@@ -60,16 +59,12 @@ class MainActivity : AppCompatActivity() {
             R.id.api_recommend to R.string.api_recommend,
             R.id.api_recent to R.string.api_recent,
         )
-        @RequiresApi(Build.VERSION_CODES.O)
-        fun getDateTimeFilename(pattern : String):String=
-            DateTimeFormatter.ofPattern(pattern).format(LocalDateTime.now())
+
         fun logD(tag:String, msg:String){
             Log.d(tag,msg)
         }
     }
-    // region api
-    private var api : String = apis[1]
-    // endregion
+    private lateinit var api : String
     private var bitmap : Bitmap? = null
     private lateinit var bind : ActivityMainBinding
     @RequiresApi(Build.VERSION_CODES.O)
@@ -77,20 +72,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         bind = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)
-
-
+        loadSettings()
         buttonsAction()
         Log.d(tag,"Screen width:${getDisplayScale(" height:")}")
 
-        setAppPreview(bind.layoutDrawer)
+        setAppPreview(bind.layoutDrawer, wallpaperFlag)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-//        data["save"] = bind.save.isChecked.toString()
-//        data["api"] = api
-        saveSettings(bind.save.isChecked)
-        saveUrl(apis.indexOf(api))
+        saveSettings()
         Log.d(tag,"OnDestroy changes saved")
     }
 
@@ -115,13 +106,30 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
-    private fun buttonsAction(){
-        bind.save.isChecked=loadSettings()
-
-        val selected = loadUrl()
+    // region shared preference
+    private fun saveSettings(){
+        getSharedPreferences(shared, MODE_PRIVATE).edit{
+            // todo save
+            putBoolean("save",bind.save.isChecked)
+            putInt("url",apis.indexOf(api))
+            putInt("flag", wallpaperFlag)
+            Log.d(tag,"save:${bind.save.isChecked}\nurl pos:${apis.indexOf(api)}")
+        }
+    }
+    private fun loadSettings(){
+        val prefs = getSharedPreferences(shared, MODE_PRIVATE)
+        bind.save.isChecked = prefs.getBoolean("save",false)
+        // api
+        val selected = prefs.getInt("url",1)
         api = apis[selected]
-        bind.apiGroup.getChildAt(selected).isSelected = true
+        bind.apiGroup.check(bind.apiGroup.getChildAt(selected).id) // set selected
+        // wallpaper mode
+        wallpaperFlag = prefs.getInt("flag",1) // FLAG_SYSTEM === 1
+        bind.wpLock.isChecked = (wallpaperFlag and 2)==2
+        bind.wpHome.isChecked = (wallpaperFlag and 1)==1
+    }
+    // endregion
+    private fun buttonsAction(){
         bind.apiGroup.setOnCheckedChangeListener { _, id ->
             api = apiRadios[id]!!
             Toast.makeText(this,"切换壁纸选择:${getString(apiDescId[id]!!)}",

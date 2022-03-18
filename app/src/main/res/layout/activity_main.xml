@@ -107,7 +107,6 @@
                 android:text="@string/api_pc"
                 android:textSize="@dimen/font_size"/>
             <RadioButton
-                android:checked="true"
                 android:id="@+id/api_mobile"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

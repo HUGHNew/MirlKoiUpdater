@@ -3,9 +3,9 @@ package com.hugh.MirlKoiUpdater
 import android.Manifest
 import android.app.Activity
 import android.app.WallpaperManager
-import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.hardware.display.DisplayManager
 import android.os.Build
 import android.view.Display
@@ -19,12 +19,22 @@ fun Activity.askForPermissions(permission:String,requestId:Int,requires:Array<St
     }
 }
 
-fun Activity.setAppPreview(layout:ViewGroup,image : Bitmap? = null){
+fun Activity.setAppPreview(layout:ViewGroup,wpf:Int=WallpaperManager.FLAG_SYSTEM){
+    if(wpf==0)return
+    val flag = if(wpf==3){
+        WallpaperManager.FLAG_SYSTEM
+    }else{
+        wpf
+    }
     askForPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,MainActivity.READ_STORAGE,
         arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE))
-    layout.background =
-        image?.toDrawable(resources)
-            ?: (getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager).drawable
+    val wm = WallpaperManager.getInstance(this)
+    val pfd = wm.getWallpaperFile(flag)
+    layout.background = BitmapFactory.decodeFileDescriptor(pfd.fileDescriptor).toDrawable(resources)
+    pfd.close()
+}
+fun Activity.setAppPreview(layout:ViewGroup,image : Bitmap?){
+    image?.let { layout.background =  it.toDrawable(resources) }
 }
 
 fun Activity.getDisplayWidth():Int{
