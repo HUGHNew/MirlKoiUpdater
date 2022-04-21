@@ -41,9 +41,9 @@ class MainActivity : AppCompatActivity() {
         val apis = listOf(
             "https://iw233.cn/API/pc.php",
             "https://iw233.cn/API/mp.php",
-            "https://iw233.cn/API/Random.php",
-            "https://iw233.cn/API/Mirlkoi.php",
-            "https://iw233.cn/API/Mirlkoi-iw233.php",
+            "https://iw233.cn/api.php?sort=random",
+            "https://iw233.cn/api.php?sort=top",
+            "https://iw233.cn/api.php?sort=iw233",
         )
         val apiRadios = mapOf(
             R.id.api_pc to apis[0],
