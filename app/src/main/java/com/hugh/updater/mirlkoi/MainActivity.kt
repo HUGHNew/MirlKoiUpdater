@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
-import android.util.Log
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -58,7 +57,6 @@ class MainActivity : AppCompatActivity() {
         )
         // endregion
     }
-    private lateinit var api : String
     private lateinit var bind : ActivityMainBinding
     private lateinit var model: MainViewModel
     // region permissions
@@ -110,9 +108,9 @@ class MainActivity : AppCompatActivity() {
         getSharedPreferences(shared, MODE_PRIVATE).edit{
             // todo save
             putBoolean("save",bind.save.isChecked)
-            putInt("url",apis.indexOf(api))
+            putInt("url",apis.indexOf(model.api))
             putInt("flag", model.flag)
-            L.d(tag,"save:${bind.save.isChecked}\nurl pos:${apis.indexOf(api)}")
+            L.d(tag,"save:${bind.save.isChecked}\nurl pos:${apis.indexOf(model.api)}")
         }
     }
     private fun loadSettings(){
@@ -120,7 +118,7 @@ class MainActivity : AppCompatActivity() {
         bind.save.isChecked = prefs.getBoolean("save",false)
         // api
         val selected = prefs.getInt("url",1)
-        api = apis[selected]
+        model.api = apis[selected]
         bind.apiGroup.check(bind.apiGroup.getChildAt(selected).id) // set selected
         // wallpaper mode
         model.flag = prefs.getInt("flag",1) // FLAG_SYSTEM === 1
@@ -130,9 +128,9 @@ class MainActivity : AppCompatActivity() {
     // endregion
     private fun buttonsAction(){
         bind.apiGroup.setOnCheckedChangeListener { _, id ->
-            api = apiRadios[id]!!
+            model.api = apiRadios[id]!!
             showToast("切换壁纸选择:${getString(apiDescId[id]!!)}", yOff = model.toastYOff)
-            L.d(tag,"button clicked $api")
+            L.d(tag,"button clicked ${model.api}")
         }
 
         bind.wpHome.setOnClickListener {

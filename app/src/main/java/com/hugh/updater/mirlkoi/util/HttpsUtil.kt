@@ -1,6 +1,5 @@
 package com.hugh.updater.mirlkoi.util
 
-import com.hugh.updater.mirlkoi.ImageService
 import com.hugh.updater.mirlkoi.L
 import retrofit2.Call
 import retrofit2.Callback
