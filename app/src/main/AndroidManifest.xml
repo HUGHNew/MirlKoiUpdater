@@ -3,18 +3,18 @@
     package="com.hugh.updater.mirlkoi">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.SET_WALLPAPER"/>
-    <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS"/>
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
+        android:fullBackupContent="true"
         android:icon="@drawable/update"
         android:label="@string/app_name"
         android:roundIcon="@drawable/update"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MirlKoi"
-        android:fullBackupContent="true">
+        android:theme="@style/Theme.MirlKoi">
         <activity
             android:name=".MainActivity"
             android:exported="true">

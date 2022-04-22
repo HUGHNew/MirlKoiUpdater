@@ -4,7 +4,6 @@ import android.app.WallpaperManager
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.Rect
-import com.hugh.updater.mirlkoi.L
 import java.io.OutputStream
 import kotlin.math.min
 

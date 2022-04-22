@@ -17,15 +17,6 @@
         tools:context=".MainActivity">
 
         <ImageButton
-            android:id="@+id/settings"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:background="@drawable/ic_btn_setting"
-            android:contentDescription="@string/settings" />
-
-        <ImageButton
             android:id="@+id/update_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -53,8 +44,8 @@
             android:layout_height="wrap_content"
 
             app:layout_constraintTop_toBottomOf="@id/update_button"
-            app:layout_constraintEnd_toEndOf="@id/v0.5"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/update_button"
+            app:layout_constraintStart_toStartOf="@id/update_button"
             android:text="@string/mode_lock"/>
         <CheckBox
             android:id="@+id/wp_home"
@@ -63,8 +54,8 @@
             android:text="@string/mode_home"
 
             app:layout_constraintTop_toBottomOf="@id/download_button"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@id/v0.5"
+            app:layout_constraintEnd_toEndOf="@id/download_button"
+            app:layout_constraintStart_toStartOf="@id/download_button"
             android:checked="true"/>
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/v0.5"
@@ -79,60 +70,9 @@
             android:orientation="horizontal"
             app:layout_constraintGuide_percent="0.8"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/drawer"
         android:layout_gravity="end"
         android:layout_width="200dp"
-        android:layout_height="match_parent">
-        <CheckBox
-            android:id="@+id/save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="@id/api_group"
-            android:text="@string/save_to_gallery"/>
-        <RadioGroup
-            android:id="@+id/api_group"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:alpha="0.5"
-            tools:viewBindingIgnore="true"
-            app:layout_constraintTop_toBottomOf="@id/save"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-            <RadioButton
-                android:id="@+id/api_pc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/api_pc"
-                android:textSize="@dimen/font_size"/>
-            <RadioButton
-                android:id="@+id/api_mobile"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/api_mp"
-                android:textSize="@dimen/font_size" />
-
-            <RadioButton
-                android:id="@+id/api_random"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/api_random"
-                android:textSize="@dimen/font_size" />
-
-            <RadioButton
-                android:id="@+id/api_recommend"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/api_recommend"
-                android:textSize="@dimen/font_size" />
-
-            <RadioButton
-                android:id="@+id/api_recent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/api_recent"
-                android:textSize="@dimen/font_size" />
-        </RadioGroup>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="match_parent"/>
 </androidx.drawerlayout.widget.DrawerLayout>

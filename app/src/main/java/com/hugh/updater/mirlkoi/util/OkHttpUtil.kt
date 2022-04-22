@@ -1,9 +1,5 @@
 package com.hugh.updater.mirlkoi.util
 
-import com.hugh.updater.mirlkoi.BASE_URL
-import com.hugh.updater.mirlkoi.ImageType
-import com.hugh.updater.mirlkoi.L
-import com.hugh.updater.mirlkoi.Type2Api
 import okhttp3.*
 import java.io.IOException
 

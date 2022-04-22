@@ -10,10 +10,36 @@ android {
         applicationId "com.hugh.updater.mirlkoi"
         minSdk 24
         targetSdk 32
-        versionCode 10
-        versionName "1.0.1"
+        versionCode 12
+        versionName "1.2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
+    }
+
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        // add the code from below line.
+        applicationVariants.all{
+                // this method is use to rename your all apk weather
+                // it may be signed or unsigned(debug apk)
+            variant ->
+                variant.outputs.each{
+                        // on below line we are setting a
+                        // name to our apk as GFG.apk
+                    output->
+                        def name = "MirlKoiUpdater.apk"
+                        // on below line we are setting the
+                        // outputFile Name to our apk file.
+                        output.outputFileName = name
+                }
+        }
     }
 
     compileOptions {
@@ -33,6 +59,11 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion '1.1.1'
     }
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
 }
 
 dependencies {
@@ -42,6 +73,9 @@ dependencies {
     implementation 'androidx.compose.animation:animation:1.1.1'
     implementation 'androidx.compose.ui:ui-tooling:1.1.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1'
+    implementation "androidx.compose.ui:ui:$compose_version"
+    implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.1.1'
 
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
