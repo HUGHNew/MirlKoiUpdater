@@ -1,4 +1,4 @@
-package com.hugh.MirlKoiUpdater
+package com.hugh.mirlkoi
 
 import org.junit.Test
 
