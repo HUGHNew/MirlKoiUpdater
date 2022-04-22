@@ -1,10 +1,10 @@
-package com.hugh.MirlKoiUpdater
+package com.hugh.updater.mirlkoi.util
 
 import android.app.WallpaperManager
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.Rect
-import com.hugh.MirlKoiUpdater.MainActivity.Companion.logD
+import com.hugh.updater.mirlkoi.L
 import java.io.OutputStream
 import kotlin.math.min
 
@@ -34,9 +34,9 @@ fun getScaleRatio(src_w:Int,src_h:Int,dst_w:Int,dst_h:Int):Int{
         min(src_h/dst_h,src_w/dst_w)
     }
 }
-fun Bitmap.rotate(degree:Float):Bitmap{
+fun Bitmap.rotate(degree:Float = 90f):Bitmap{
     val matrix = Matrix()
-    matrix.setRotate(90f,width/2f,height/2f)
+    matrix.setRotate(degree,width/2f,height/2f)
     return Bitmap.createBitmap(this,0,0,width,height,matrix,true)
 }
 fun Bitmap.getFitBitmap(Width:Int,Height:Int):Bitmap{
@@ -44,7 +44,7 @@ fun Bitmap.getFitBitmap(Width:Int,Height:Int):Bitmap{
         this.rotate(90f)
     }else{this}
     val bm = Bitmap.createScaledBitmap(bitmap,Width,Height,true)
-    logD("create bitmap","width:${bm.width}|height:${bm.height}")
+    L.d("create bitmap","width:${bm.width}|height:${bm.height}")
     return bm
 }
 inline fun Bitmap.saveToWallpaper(wallMan: WallpaperManager,mode:Int,
