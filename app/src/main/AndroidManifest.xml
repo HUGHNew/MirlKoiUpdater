@@ -16,7 +16,7 @@
         android:theme="@style/Theme.MirlKoi"
         android:fullBackupContent="true">
         <activity
-            android:name="com.hugh.updater.mirlkoi.MainActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
