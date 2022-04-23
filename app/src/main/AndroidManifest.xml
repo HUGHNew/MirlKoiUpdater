@@ -14,9 +14,11 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/update"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MirlKoi">
+        android:theme="@style/Theme.MirlKoi"
+        android:dataExtractionRules="@xml/data_extraction_rules">
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="locked"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
