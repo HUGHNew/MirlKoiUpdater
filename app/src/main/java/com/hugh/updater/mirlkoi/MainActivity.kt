@@ -15,11 +15,12 @@ import android.provider.MediaStore
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.sharp.DateRange
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -32,12 +33,17 @@ import androidx.core.content.contentValuesOf
 import androidx.core.content.edit
 import androidx.core.view.GestureDetectorCompat
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.hugh.updater.mirlkoi.databinding.ActivityMainBinding
+import com.hugh.updater.mirlkoi.ui.compose.MomentDialog
 import com.hugh.updater.mirlkoi.ui.compose.click
+import com.hugh.updater.mirlkoi.ui.theme.GraySemi
 import com.hugh.updater.mirlkoi.ui.theme.MirlKoiUpdaterTheme
 import com.hugh.updater.mirlkoi.ui.theme.Purple200
 import com.hugh.updater.mirlkoi.util.*
 import com.hugh.updater.mirlkoi.vm.MainViewModel
+import com.vanpra.composematerialdialogs.datetime.time.timepicker
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -90,7 +96,6 @@ class MainActivity : AppCompatActivity() {
             checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
         L.d(tag, "read:${model.storageRead}")
     }
-
     // endregion
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.O)
@@ -103,30 +108,12 @@ class MainActivity : AppCompatActivity() {
         loadSettings()
         bind.drawer.setContent {
             MirlKoiUpdaterTheme {
-                Column {
-                    val saveFlag = remember { mutableStateOf(false) }
+                Column(verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.Start,
+                    modifier = Modifier
+                    .background(color = GraySemi)) {
                     val labelTag = remember { mutableStateOf(findLabelsKey(model.api)) }
-                    L.d(tag, "save:${model.alwaysSave}\turl:${model.api}")
-                    Row(modifier = Modifier
-                        .align(Alignment.Start)
-                        .click {
-                            saveFlag.value = !saveFlag.value
-                            L.v(tag, "save status:${saveFlag.value}")
-                        }
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(4.dp))
-                    ) {
-                        Checkbox(checked = saveFlag.value,
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = Color.Red,
-                                uncheckedColor = Color.Gray,
-                            ),
-                            onCheckedChange = {
-                                saveFlag.value = it
-                                L.v(tag, "save status:$it")
-                            })
-                        Text(text = "保存壁纸", modifier = Modifier.align(Alignment.CenterVertically))
-                    }
+                    L.d(tag, "url:${model.api}")
                     ApiLabels.keys.forEach { label ->
                         val onClick = {
                             labelTag.value = label
@@ -135,7 +122,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         Row(modifier = Modifier
                             .align(Alignment.Start)
-                            .click { onClick() }
+                            .click(onClick = onClick)
                             .clip(RoundedCornerShape(8.dp))
                             .fillMaxWidth()
                         ) {
@@ -147,27 +134,74 @@ class MainActivity : AppCompatActivity() {
                                     unselectedColor = Color.Cyan
                                 )
                             )
-                            Text(
-                                text = label,
-                                fontSize = 20.sp,
-                                color = Color.Black,
-                                modifier = Modifier.align(Alignment.CenterVertically),
-                            )
+                            Column(modifier = Modifier
+                                .wrapContentHeight()
+                                .fillMaxWidth()
+                                .align(Alignment.CenterVertically)
+                                ) {
+                                Text(
+                                    text = label,
+                                    fontSize = 20.sp,
+                                    color = Color.Black,
+                                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                                )
+                            }
                         }
+                    }
+                    val autoUpdate = remember { mutableStateOf(false) }
+                    val dialogState = rememberMaterialDialogState()
+
+                    MomentDialog(dialogState) {
+                        timepicker { time ->
+                            // Do stuff with java.time.LocalTime object which is passed in
+                        }
+                    }
+                    Button(onClick = {
+                        // https://developer.android.com/reference/kotlin/androidx/compose/material/package-summary#AlertDialog(kotlin.Function0,kotlin.Function0,androidx.compose.ui.Modifier,kotlin.Function0,kotlin.Function0,kotlin.Function0,androidx.compose.ui.graphics.Shape,androidx.compose.ui.graphics.Color,androidx.compose.ui.graphics.Color,androidx.compose.ui.window.DialogProperties)
+                        MaterialAlertDialogBuilder(this@MainActivity)
+//                            .setTitle(resources.getString(R.string.title))
+                            .setTitle("定时模式选择")
+                            .setItems(arrayOf("按时间点","按间隔")) { _, which ->
+                                L.i(tag," $which")
+                                when(which){
+                                    0 ->{
+                                        dialogState.show()
+                                    }
+                                    1 ->{}
+                                }
+                            }
+                            .show()
+                        // a select dialog and two dialogs
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = if(autoUpdate.value){Color.Cyan}else{Color.Gray},
+                        backgroundColor = Color.Transparent
+                    ),
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .align(Alignment.CenterHorizontally)
+                        .background(color = Color.Transparent)
+                    ) {
+                        Icon(Icons.Sharp.DateRange, contentDescription = "Timer Button",
+                            modifier = Modifier.fillMaxSize(1.5f))
                     }
                 }
             }
         }
         buttonsAction()
 
+//        val request = OneTimeWorkRequest.Builder(UpdateWork::class.java).build()
+//        WorkManager.getInstance(this).enqueue(request)
+        // gesture here
         bind.layoutDrawer.setOnTouchListener { _, event ->
             mDetector.value.onTouchEvent(event)
         }
         L.d(tag, "Screen width:${getDisplayScale(" height:")}")
 
-        requestStorageRead {
-            setAppPreview(bind.layoutDrawer, model.flag)
-        }
+        model.bitmap = try {
+                setAppPreview(bind.layoutDrawer,openFileInput(single))
+            }catch (e:Exception){ null }
     }
 
     override fun onDestroy() {
@@ -193,12 +227,18 @@ class MainActivity : AppCompatActivity() {
         model.api = prefs.getString("url", "mp") ?: "mp"
         // wallpaper mode
         model.flag = prefs.getInt("flag", 1) // FLAG_SYSTEM === 1
+
+        // init button check status
         bind.wpLock.isChecked = (model.flag and 2) == 2
         bind.wpHome.isChecked = (model.flag and 1) == 1
+        bind.wpSave.isChecked = model.alwaysSave
     }
 
     // endregion
     private fun buttonsAction() {
+        bind.wpSave.setOnCheckedChangeListener { _, isChecked ->
+            model.alwaysSave = isChecked
+        }
         bind.wpHome.setOnClickListener {
             model.flag = model.flag xor WallpaperManager.FLAG_SYSTEM
         }

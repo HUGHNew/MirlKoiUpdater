@@ -11,6 +11,7 @@ import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.graphics.drawable.toDrawable
+import java.io.InputStream
 
 @SuppressLint("MissingPermission")
 fun Activity.setAppPreview(layout:ViewGroup, wpf:Int=WallpaperManager.FLAG_SYSTEM){
@@ -26,6 +27,11 @@ fun Activity.setAppPreview(layout:ViewGroup, wpf:Int=WallpaperManager.FLAG_SYSTE
                 .decodeFileDescriptor(it.fileDescriptor)
                 .toDrawable(resources)
         }
+    }
+}
+fun Activity.setAppPreview(layout:ViewGroup,stream: InputStream):Bitmap{
+    return BitmapFactory.decodeStream(stream).apply {
+        setAppPreview(layout,this)
     }
 }
 fun Activity.setAppPreview(layout:ViewGroup,image : Bitmap?){

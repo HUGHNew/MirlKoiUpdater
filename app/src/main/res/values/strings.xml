@@ -2,22 +2,10 @@
 <resources>
     <string name="app_name">MirlKoiUpdater</string>
 
-    <string name="mode_desc">设置壁纸模式</string>
     <string name="mode_lock">设置锁屏壁纸</string>
     <string name="mode_home">设置桌面壁纸</string>
-    <string name="mode_both">都设置</string>
-
-    <string name="hide_trigger">开启隐藏选项</string>
-    <string name="save_to_gallery">保存壁纸</string>
-
-    <string name="api_pc">横屏壁纸</string>
-    <string name="api_mp">竖屏壁纸</string>
-    <string name="api_random">随机壁纸</string>
-    <string name="api_recommend">推荐壁纸</string>
-    <string name="api_recent">最近壁纸</string>
-    <string name="api_porn">🐍图</string>
+    <string name="mode_save">默认保存壁纸</string>
 
     <string name="update_button">Updater Now</string>
     <string name="download_button">Download Current Picture</string>
-    <string name="settings">update-settings</string>
 </resources>

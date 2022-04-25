@@ -2,10 +2,14 @@ package com.hugh.updater.mirlkoi.util
 
 import okhttp3.*
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 object OkHttpUtil {
     const val tag = "OkHttpUtil"
+    private const val callTimeoutValue = 2L
     val http: OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(callTimeoutValue/2,TimeUnit.SECONDS)
+        .callTimeout(callTimeoutValue, TimeUnit.SECONDS)
         .followRedirects(true).build()
     fun api(type: ImageType, proc:(Call, Response)->Unit){
         access(addApiSort(type),proc)
@@ -20,6 +24,7 @@ object OkHttpUtil {
         this.enqueue(object :Callback{
             override fun onFailure(call: Call, e: IOException) {
                 L.e(tag, "$call failed")
+                L.e(tag,"exception:${e.cause}|${e.message}")
             }
 
             override fun onResponse(call: Call, response: Response) {
